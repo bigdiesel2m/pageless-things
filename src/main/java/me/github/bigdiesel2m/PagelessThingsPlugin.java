@@ -28,6 +28,7 @@ import java.nio.file.StandardOpenOption;
 )
 public class PagelessThingsPlugin extends Plugin
 {
+	private static final String DB_URL = "https://github.com/bigdiesel2m/pageless-things-scraper/blob/db/object_ids.h2.mv.db";
 	@Inject
 	private Client client;
 
@@ -52,22 +53,28 @@ public class PagelessThingsPlugin extends Plugin
 
 	void downloadDatabase()
 	{
-		Request myRequest = new Request.Builder()
+		Request dbGet = new Request.Builder()
 				.get()
-				.url("https://github.com/bigdiesel2m/pageless-things-scraper/blob/db/object_ids.h2.mv.db")
+				.url(DB_URL)
 				.build();
-		Call myCall = httpClient.newCall(myRequest);
-        try (Response myResponse = myCall.execute();
-			 ResponseBody myBody = myResponse.body();
-			 InputStream myStream = myBody.byteStream()) {
-			Files.copy(
-					myStream,
-					new File(RuneLite.RUNELITE_DIR, "object_ids.h2.mv.db").toPath(),
-					StandardCopyOption.REPLACE_EXISTING
-			);
-		} catch (IOException e) {
-            //TODO
-        }
+		httpClient.newCall(dbGet).enqueue(new Callback() {
+			@Override
+			public void onFailure(Call call, IOException e) {
+				//TODO
+			}
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException {
+				try (ResponseBody responseBody = response.body();
+					 InputStream dbByteStream = responseBody.byteStream()) {
+					Files.copy(
+							dbByteStream,
+							new File(RuneLite.RUNELITE_DIR, "object_ids.h2.mv.db").toPath(),
+							StandardCopyOption.REPLACE_EXISTING
+					);
+				}
+			}
+		});
     }
 
 	@Provides
