@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.Path;
 
 @Slf4j
 @PluginDescriptor(
@@ -22,6 +23,8 @@ import java.nio.file.StandardCopyOption;
 )
 public class PagelessThingsPlugin extends Plugin {
     private static final String DB_URL = "https://github.com/bigdiesel2m/pageless-things-scraper/blob/db/object_ids.h2.mv.db";
+    private static final Path DB_PATH = new File(RuneLite.RUNELITE_DIR, "object_ids.h2.mv.db").toPath();
+    private H2Manager h2Manager;
     @Inject
     private Client client;
 
@@ -59,13 +62,16 @@ public class PagelessThingsPlugin extends Plugin {
                      InputStream dbByteStream = responseBody.byteStream()) {
                     Files.copy(
                             dbByteStream,
-                            new File(RuneLite.RUNELITE_DIR, "object_ids.h2.mv.db").toPath(),
+                            DB_PATH,
                             StandardCopyOption.REPLACE_EXISTING
                     );
+                    h2Manager = new H2Manager(DB_PATH);
                 }
             }
         });
     }
+
+
 
     @Provides
     PagelessThingsConfig provideConfig(ConfigManager configManager) {
