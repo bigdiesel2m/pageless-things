@@ -1,6 +1,8 @@
 package me.github.bigdiesel2m;
 
+import com.google.common.collect.Sets;
 import com.google.inject.Provides;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
@@ -11,6 +13,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
 import okhttp3.*;
 
 import javax.inject.Inject;
@@ -20,7 +23,6 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
@@ -30,7 +32,9 @@ public class PagelessThingsPlugin extends Plugin {
     private static final Path DB_PATH = new File(RuneLite.RUNELITE_DIR, "object_ids.h2.mv.db").toPath();
 
     private H2Manager h2Manager;
-    private Set<GameObject> highlightSet = new HashSet<GameObject>();
+    private PagelessThingsOverlay pagelessThingsOverlay;
+    @Getter
+    private Set<GameObject> highlightSet = Sets.newIdentityHashSet();
 
     @Inject
     private Client client;
@@ -41,16 +45,22 @@ public class PagelessThingsPlugin extends Plugin {
     @Inject
     private OkHttpClient httpClient;
 
+    @Inject
+    private OverlayManager overlayManager;
+
     @Override
     protected void startUp() throws Exception {
         log.info("Pageless Things started!");
         downloadDatabase();
+        pagelessThingsOverlay = new PagelessThingsOverlay(this);
+        overlayManager.add(pagelessThingsOverlay);
     }
 
     @Override
     protected void shutDown() throws Exception {
         log.info("Pageless Things stopped!");
         highlightSet.clear();
+        overlayManager.remove(pagelessThingsOverlay);
     }
 
     void downloadDatabase() {
@@ -74,8 +84,9 @@ public class PagelessThingsPlugin extends Plugin {
     @Subscribe
     public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned) {
         GameObject gameObject = gameObjectSpawned.getGameObject();
-        if (h2Manager.hasPage(gameObject.getId())) {
+        if (!h2Manager.hasPage(gameObject.getId())) {
             highlightSet.add(gameObject);
+            // TODO implement non-null checking
         }
     }
 
