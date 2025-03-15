@@ -6,8 +6,10 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
+import net.runelite.api.GameState;
 import net.runelite.api.events.GameObjectDespawned;
 import net.runelite.api.events.GameObjectSpawned;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -95,6 +97,13 @@ public class PagelessThingsPlugin extends Plugin {
         GameObject gameObject = gameObjectDespawned.getGameObject();
         highlightSet.remove(gameObject);
     }
+
+	@Subscribe
+	public void onGameStateChanged(GameStateChanged gameStateChanged) {
+		if (gameStateChanged.getGameState() == GameState.LOADING) {
+			highlightSet.clear();
+		}
+	}
 
     @Provides
     PagelessThingsConfig provideConfig(ConfigManager configManager) {
