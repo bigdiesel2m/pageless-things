@@ -30,7 +30,7 @@ import java.util.Set;
 @Slf4j
 @PluginDescriptor(name = "Pageless Things")
 public class PagelessThingsPlugin extends Plugin {
-    private static final String DB_URL = "https://github.com/bigdiesel2m/pageless-things-scraper/blob/db/object_ids.h2.mv.db";
+    private static final String DB_URL = "https://github.com/bigdiesel2m/pageless-things-scraper/raw/refs/heads/db/object_ids.h2.mv.db";
     private static final Path DB_PATH = new File(RuneLite.RUNELITE_DIR, "object_ids.h2.mv.db").toPath();
 
     private H2Manager h2Manager;
@@ -86,9 +86,11 @@ public class PagelessThingsPlugin extends Plugin {
     @Subscribe
     public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned) {
         GameObject gameObject = gameObjectSpawned.getGameObject();
-        if (!h2Manager.hasPage(gameObject.getId())) {
+        if (h2Manager.needsPage(gameObject.getId())) {
             highlightSet.add(gameObject);
             // TODO implement non-null checking
+            // TODO don't highlight things on other planes
+            // TODO something with multilocs?
         }
     }
 
@@ -98,12 +100,12 @@ public class PagelessThingsPlugin extends Plugin {
         highlightSet.remove(gameObject);
     }
 
-	@Subscribe
-	public void onGameStateChanged(GameStateChanged gameStateChanged) {
-		if (gameStateChanged.getGameState() == GameState.LOADING) {
-			highlightSet.clear();
-		}
-	}
+    @Subscribe
+    public void onGameStateChanged(GameStateChanged gameStateChanged) {
+        if (gameStateChanged.getGameState() == GameState.LOADING) {
+            highlightSet.clear();
+        }
+    }
 
     @Provides
     PagelessThingsConfig provideConfig(ConfigManager configManager) {
