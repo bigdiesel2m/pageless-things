@@ -86,9 +86,10 @@ public class PagelessThingsPlugin extends Plugin {
     @Subscribe
     public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned) {
         GameObject gameObject = gameObjectSpawned.getGameObject();
-        if (h2Manager.needsPage(gameObject.getId())) {
+        String name = client.getObjectDefinition(gameObject.getId()).getName();
+
+        if (h2Manager.needsPage(gameObject.getId()) && !name.equals("null")) {
             highlightSet.add(gameObject);
-            // TODO implement non-null checking
             // TODO don't highlight things on other planes
             // TODO something with multilocs?
         }
