@@ -54,7 +54,7 @@ public class PagelessThingsPlugin extends Plugin {
     protected void startUp() throws Exception {
         log.info("Pageless Things started!");
         downloadDatabase();
-        pagelessThingsOverlay = new PagelessThingsOverlay(this);
+        pagelessThingsOverlay = new PagelessThingsOverlay(this, client);
         overlayManager.add(pagelessThingsOverlay);
     }
 
