@@ -30,8 +30,8 @@ import java.util.Set;
 @Slf4j
 @PluginDescriptor(name = "Pageless Things")
 public class PagelessThingsPlugin extends Plugin {
-    private static final String DB_URL = "https://github.com/bigdiesel2m/pageless-things-scraper/raw/refs/heads/db/object_ids.h2.mv.db";
-    private static final Path DB_PATH = new File(RuneLite.RUNELITE_DIR, "object_ids.h2.mv.db").toPath();
+    private static final String DB_URL = "https://github.com/bigdiesel2m/pageless-things-scraper/raw/refs/heads/db/page_ids.h2.mv.db";
+    private static final Path DB_PATH = new File(RuneLite.RUNELITE_DIR, "page_ids.h2.mv.db").toPath();
 
     private H2Manager h2Manager;
     private PagelessThingsOverlay pagelessThingsOverlay;
@@ -54,7 +54,7 @@ public class PagelessThingsPlugin extends Plugin {
     protected void startUp() throws Exception {
         log.info("Pageless Things started!");
         downloadDatabase();
-        pagelessThingsOverlay = new PagelessThingsOverlay(this, client);
+        pagelessThingsOverlay = new PagelessThingsOverlay(this, config, client);
         overlayManager.add(pagelessThingsOverlay);
     }
 
@@ -90,7 +90,6 @@ public class PagelessThingsPlugin extends Plugin {
 
         if (h2Manager.needsPage(gameObject.getId()) && !name.equals("null")) {
             highlightSet.add(gameObject);
-            // TODO don't highlight things on other planes
             // TODO something with multilocs?
         }
     }
