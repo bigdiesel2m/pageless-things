@@ -7,9 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
 import net.runelite.api.GameState;
-import net.runelite.api.events.GameObjectDespawned;
-import net.runelite.api.events.GameObjectSpawned;
-import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.NPC;
+import net.runelite.api.events.*;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -36,7 +35,9 @@ public class PagelessThingsPlugin extends Plugin {
     private H2Manager h2Manager;
     private PagelessThingsOverlay pagelessThingsOverlay;
     @Getter
-    private Set<GameObject> highlightSet = Sets.newIdentityHashSet();
+    private Set<GameObject> objectHighlightSet = Sets.newIdentityHashSet();
+    @Getter
+    private Set<NPC> npcHighlightSet = Sets.newIdentityHashSet();
 
     @Inject
     private Client client;
@@ -61,7 +62,8 @@ public class PagelessThingsPlugin extends Plugin {
     @Override
     protected void shutDown() throws Exception {
         log.info("Pageless Things stopped!");
-        highlightSet.clear();
+        objectHighlightSet.clear();
+        npcHighlightSet.clear();
         overlayManager.remove(pagelessThingsOverlay);
     }
 
@@ -88,8 +90,8 @@ public class PagelessThingsPlugin extends Plugin {
         GameObject gameObject = gameObjectSpawned.getGameObject();
         String name = client.getObjectDefinition(gameObject.getId()).getName();
 
-        if (h2Manager.needsPage(gameObject.getId()) && !name.equals("null")) {
-            highlightSet.add(gameObject);
+        if (h2Manager.objectNeedsPage(gameObject.getId()) && !name.equals("null")) {
+            objectHighlightSet.add(gameObject);
             // TODO something with multilocs?
         }
     }
@@ -97,13 +99,30 @@ public class PagelessThingsPlugin extends Plugin {
     @Subscribe
     public void onGameObjectDespawned(GameObjectDespawned gameObjectDespawned) {
         GameObject gameObject = gameObjectDespawned.getGameObject();
-        highlightSet.remove(gameObject);
+        objectHighlightSet.remove(gameObject);
+    }
+
+    @Subscribe
+    public void onNpcSpawned(NpcSpawned npcSpawned) {
+        NPC npc = npcSpawned.getNpc();
+        String name = client.getNpcDefinition(npc.getId()).getName();
+
+        if (h2Manager.npcNeedsPage(npc.getId()) && !name.equals("null")) {
+            npcHighlightSet.add(npc);
+        }
+    }
+
+    @Subscribe
+    public void onNpcDespawned(NpcDespawned npcDespawned) {
+        NPC npc = npcDespawned.getNpc();
+        npcHighlightSet.remove(npc);
     }
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged gameStateChanged) {
         if (gameStateChanged.getGameState() == GameState.LOADING) {
-            highlightSet.clear();
+            objectHighlightSet.clear();
+            npcHighlightSet.clear();
         }
     }
 

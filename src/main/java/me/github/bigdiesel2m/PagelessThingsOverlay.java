@@ -2,6 +2,7 @@ package me.github.bigdiesel2m;
 
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
+import net.runelite.api.NPC;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -18,9 +19,17 @@ public class PagelessThingsOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         // get list of objects to highlight
         if (pagelessThingsConfig.highlightObjects()) {
-            for (GameObject gameObject : pagelessThingsPlugin.getHighlightSet()) {
+            for (GameObject gameObject : pagelessThingsPlugin.getObjectHighlightSet()) {
                 Shape shape = gameObject.getConvexHull();
                 if (shape != null && client.getLocalPlayer().getWorldView().getPlane() == gameObject.getPlane()) {
+                    OverlayUtil.renderPolygon(graphics, shape, Color.red);
+                }
+            }
+        }
+        if (pagelessThingsConfig.highlightNPCs()) {
+            for (NPC npc : pagelessThingsPlugin.getNpcHighlightSet()) {
+                Shape shape = npc.getConvexHull();
+                if (shape != null) {
                     OverlayUtil.renderPolygon(graphics, shape, Color.red);
                 }
             }

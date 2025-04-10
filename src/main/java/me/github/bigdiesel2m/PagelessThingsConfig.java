@@ -10,6 +10,16 @@ public interface PagelessThingsConfig extends Config {
 
     @ConfigItem(
             position = 1,
+            keyName = "hideNPCs",
+            name = "Highlight NPCs",
+            description = "Configures whether to highlight NPCs without wiki pages."
+    )
+    default boolean highlightNPCs() {
+        return true;
+    }
+
+    @ConfigItem(
+            position = 2,
             keyName = "highlightObjects",
             name = "Highlight Objects",
             description = "Configures whether to highlight objects without wiki pages."
@@ -17,14 +27,4 @@ public interface PagelessThingsConfig extends Config {
     default boolean highlightObjects() {
         return true;
     }
-//	@ConfigItem(
-//			position = 2,
-//			keyName = "hidePlayers2D",
-//			name = "Hide others 2D",
-//			description = "Configures whether or not other players 2D elements are hidden."
-//	)
-//	default boolean hideOthers2D()
-//	{
-//		return true;
-//	}
 }
