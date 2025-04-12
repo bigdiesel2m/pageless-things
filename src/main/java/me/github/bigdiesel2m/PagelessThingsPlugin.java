@@ -4,10 +4,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.Provides;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.GameObject;
-import net.runelite.api.GameState;
-import net.runelite.api.NPC;
+import net.runelite.api.*;
 import net.runelite.api.events.*;
 import net.runelite.client.RuneLite;
 import net.runelite.client.config.ConfigManager;
@@ -87,10 +84,15 @@ public class PagelessThingsPlugin extends Plugin {
 
     @Subscribe
     public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned) {
-        GameObject gameObject = gameObjectSpawned.getGameObject();
-        String name = client.getObjectDefinition(gameObject.getId()).getName();
+        if (h2Manager == null) {
+            return;
+        }
 
-        if (h2Manager.objectNeedsPage(gameObject.getId()) && !name.equals("null")) {
+        GameObject gameObject = gameObjectSpawned.getGameObject();
+        ObjectComposition comp = client.getObjectDefinition(gameObject.getId());
+        String name = comp == null ? null : comp.getName();
+
+        if (h2Manager.objectNeedsPage(gameObject.getId()) && name != null && !name.equals("null")) {
             objectHighlightSet.add(gameObject);
             // TODO something with multilocs?
         }
@@ -104,10 +106,15 @@ public class PagelessThingsPlugin extends Plugin {
 
     @Subscribe
     public void onNpcSpawned(NpcSpawned npcSpawned) {
-        NPC npc = npcSpawned.getNpc();
-        String name = client.getNpcDefinition(npc.getId()).getName();
+        if (h2Manager == null) {
+            return;
+        }
 
-        if (h2Manager.npcNeedsPage(npc.getId()) && !name.equals("null")) {
+        NPC npc = npcSpawned.getNpc();
+        NPCComposition def = client.getNpcDefinition(npc.getId());
+        String name = def == null ? null : def.getName();
+
+        if (h2Manager.npcNeedsPage(npc.getId()) && name != null && !name.equals("null")) {
             npcHighlightSet.add(npc);
         }
     }

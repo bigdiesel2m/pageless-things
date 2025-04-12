@@ -22,8 +22,14 @@ public class H2Manager {
             connection = DriverManager.getConnection("jdbc:h2:" + pathString);
             checkObjectID = connection.prepareStatement("SELECT COUNT (*) FROM OBJECTS WHERE ID = ?");
             checkNPCID = connection.prepareStatement("SELECT COUNT (*) FROM NPCS WHERE ID = ?");
-        } catch (SQLException exception) {
+        } catch (SQLException | ClassNotFoundException exception) {
             log.warn("Failed to load database: ", exception);
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException ignored2) {
+                }
+            }
             connection = null;
         }
     }
