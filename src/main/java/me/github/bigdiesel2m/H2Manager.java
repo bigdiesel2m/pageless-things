@@ -13,6 +13,10 @@ public class H2Manager {
 
     public H2Manager(Path path) {
         try {
+            // force driver to load and register into the jdbc provider map
+            // since hub loading does not handle jar service loading it seems?
+            Class.forName("org.h2.Driver");
+
             String pathString = path.toString();
             pathString = pathString.substring(0, pathString.lastIndexOf(".mv.db"));
             connection = DriverManager.getConnection("jdbc:h2:" + pathString);
