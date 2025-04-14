@@ -1,8 +1,6 @@
 package me.github.bigdiesel2m;
 
-import net.runelite.api.Client;
-import net.runelite.api.GameObject;
-import net.runelite.api.NPC;
+import net.runelite.api.*;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
@@ -19,9 +17,19 @@ public class PagelessThingsOverlay extends Overlay {
     public Dimension render(Graphics2D graphics) {
         // get list of objects to highlight
         if (pagelessThingsConfig.highlightObjects()) {
-            for (GameObject gameObject : pagelessThingsPlugin.getObjectHighlightSet()) {
-                Shape shape = gameObject.getConvexHull();
-                if (shape != null && client.getLocalPlayer().getWorldView().getPlane() == gameObject.getPlane()) {
+            Shape shape = null;
+            for (TileObject tileObject : pagelessThingsPlugin.getObjectHighlightSet()) {
+                if (tileObject instanceof GameObject) {
+                    shape = ((GameObject) tileObject).getConvexHull();
+                } else if (tileObject instanceof GroundObject) {
+                    shape = ((GroundObject) tileObject).getConvexHull();
+                } else if (tileObject instanceof DecorativeObject) {
+                    shape = ((DecorativeObject) tileObject).getConvexHull();
+                } else if (tileObject instanceof WallObject) {
+                    shape = ((WallObject) tileObject).getConvexHull();
+                }
+
+                if (shape != null && client.getLocalPlayer().getWorldView().getPlane() == tileObject.getPlane()) {
                     OverlayUtil.renderPolygon(graphics, shape, Color.red);
                 }
             }

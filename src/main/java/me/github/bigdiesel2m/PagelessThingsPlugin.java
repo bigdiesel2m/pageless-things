@@ -32,7 +32,7 @@ public class PagelessThingsPlugin extends Plugin {
     private H2Manager h2Manager;
     private PagelessThingsOverlay pagelessThingsOverlay;
     @Getter
-    private Set<GameObject> objectHighlightSet = Sets.newIdentityHashSet();
+    private Set<TileObject> objectHighlightSet = Sets.newIdentityHashSet();
     @Getter
     private Set<NPC> npcHighlightSet = Sets.newIdentityHashSet();
 
@@ -82,26 +82,64 @@ public class PagelessThingsPlugin extends Plugin {
         });
     }
 
+    // Set of four object onSpawned subscriptions, all feeding into onTileObjectSpawned
     @Subscribe
     public void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned) {
+        onTileObjectSpawned(gameObjectSpawned.getGameObject());
+    }
+
+    @Subscribe
+    public void onGroundObjectSpawned(GroundObjectSpawned groundObjectSpawned) {
+        onTileObjectSpawned(groundObjectSpawned.getGroundObject());
+    }
+
+    @Subscribe
+    public void onDecorativeObjectSpawned(DecorativeObjectSpawned decorativeObjectSpawned) {
+        onTileObjectSpawned(decorativeObjectSpawned.getDecorativeObject());
+    }
+
+    @Subscribe
+    public void onWallObjectSpawned(WallObjectSpawned wallObjectSpawned) {
+        onTileObjectSpawned(wallObjectSpawned.getWallObject());
+    }
+
+    private void onTileObjectSpawned(TileObject tileObject) {
         if (h2Manager == null) {
             return;
         }
 
-        GameObject gameObject = gameObjectSpawned.getGameObject();
-        ObjectComposition comp = client.getObjectDefinition(gameObject.getId());
+        ObjectComposition comp = client.getObjectDefinition(tileObject.getId());
         String name = comp == null ? null : comp.getName();
 
-        if (h2Manager.objectNeedsPage(gameObject.getId()) && name != null && !name.equals("null")) {
-            objectHighlightSet.add(gameObject);
+        if (h2Manager.objectNeedsPage(tileObject.getId()) && name != null && !name.equals("null")) {
+            objectHighlightSet.add(tileObject);
             // TODO something with multilocs?
         }
     }
 
+    // Set of four object onDespawned subscriptions, all feeding into onTileObjectDespawned
     @Subscribe
     public void onGameObjectDespawned(GameObjectDespawned gameObjectDespawned) {
-        GameObject gameObject = gameObjectDespawned.getGameObject();
-        objectHighlightSet.remove(gameObject);
+        onTileObjectDespawned(gameObjectDespawned.getGameObject());
+    }
+
+    @Subscribe
+    public void onGroundObjectDespawned(GroundObjectDespawned groundObjectDespawned) {
+        onTileObjectDespawned(groundObjectDespawned.getGroundObject());
+    }
+
+    @Subscribe
+    public void onDecorativeObjectDespawned(DecorativeObjectDespawned decorativeObjectDespawned) {
+        onTileObjectDespawned(decorativeObjectDespawned.getDecorativeObject());
+    }
+
+    @Subscribe
+    public void onWallObjectDespawned(WallObjectDespawned wallObjectDespawned) {
+        onTileObjectDespawned(wallObjectDespawned.getWallObject());
+    }
+
+    private void onTileObjectDespawned(TileObject tileObject) {
+        objectHighlightSet.remove(tileObject);
     }
 
     @Subscribe
